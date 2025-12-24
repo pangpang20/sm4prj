@@ -22,7 +22,8 @@ ifndef JAVA_HOME
 	$(error JAVA_HOME is not set. Please export JAVA_HOME explicitly.)
 endif
 
-JAVA_JAR = ../dis-algorithm/target/dis-algorithm-1.0.0.0.jar
+# JAR路径配置 - 从环境变量UDF_JAR读取，否则使用默认值
+UDF_JAR ?= /home/vastbase/dis-algorithm-1.0.0.0.jar
 
 # 强制使用C++11标准（GCC 4.8.5不支持C++14）
 override CXXFLAGS := $(filter-out -std=c++14,$(CXXFLAGS)) -std=c++11
@@ -68,18 +69,23 @@ src/%.o: src/%.c
 		-I/home/vastbase/vasthome/include/postgresql/internal \
 		-D_GNU_SOURCE -Wall -fPIC -c -o $@ $<
 
-# 自定义目标：在安装前显示配置信息
+# 自定义目标：显示配置信息
 .PHONY: show-config
 show-config:
 	@echo "===================================="
 	@echo "VastBase SM4 Extension Build Config"
 	@echo "===================================="
+	@echo "[编译时配置]"
 	@echo "PG_CONFIG: $(PG_CONFIG)"
 	@echo "PGXS: $(PGXS)"
 	@echo "JAVA_HOME: $(JAVA_HOME)"
-	@echo "JAVA_JAR: $(JAVA_JAR)"
 	@echo "Extension: $(EXTENSION)"
 	@echo "Module: $(MODULE_big)"
-	@echo "CXXFLAGS: $(CXXFLAGS)"
-	@echo "CFLAGS: $(CFLAGS)"
+	@echo ""
+	@echo "[运行时配置 - 启动数据库前设置]"
+	@echo "UDF_JAR: $(UDF_JAR)"
+	@echo "  示例: export UDF_JAR=/path/to/dis-algorithm-1.0.0.0.jar"
+	@echo ""
+	@echo "LD_LIBRARY_PATH: 必须包含libjvm.so路径"
+	@echo "  示例: export LD_LIBRARY_PATH=\$$JAVA_HOME/lib/server:\$$LD_LIBRARY_PATH"
 	@echo "===================================="
