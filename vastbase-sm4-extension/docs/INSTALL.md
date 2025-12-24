@@ -8,8 +8,9 @@
 
 - **操作系统**: Linux (推荐 CentOS 7+, Ubuntu 18.04+, UOS 20)
 - **数据库**: VastBase 2.2
-- **JDK**: Java 11 或更高版本
+- **JDK**: Java 8
 - **编译工具**: GCC 4.8+ 或 MinGW (Windows)
+- **用户**: 使用数据库用户，比如vastbase
 
 ### 2. 检查vastbase开发环境
 
@@ -31,16 +32,26 @@ pg_config --pgxs
 ### 3. 检查JDK环境
 
 ```bash
-# 检查Java版本
+# 检查Java版本,必须和vastbase运行的jre版本一样，应该是1.8.0_312
 java -version
 javac -version
 
 # 检查JAVA_HOME
 echo $JAVA_HOME
 
-# 如果未设置，添加到 ~/.bashrc 或 ~/.bash_profile
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+
+# 下载 OpenJDK 8（用于编译）
+cd /home/vastbase
+wget https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u392-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u392b08.tar.gz
+
+tar xzf OpenJDK8U-jdk_x64_linux_hotspot_8u392b08.tar.gz
+mv jdk8u392-b08 jdk8
+
+# 设置环境变量
+export JAVA_HOME=/home/vastbase/jdk8
 export PATH=$JAVA_HOME/bin:$PATH
+
+
 ```
 
 ## 安装步骤
@@ -163,25 +174,20 @@ vb_ctl restart
 
 ### 步骤7: 创建扩展
 
+
 ```sql
 -- 连接到数据库
 vsql -r
 
+-- 先卸载旧的（如果有）
+\i uninstall_functions.sql
 
--- 删除扩展
-DROP EXTENSION IF EXISTS vastbase_sm4;
+-- 安装
+\i install_functions.sql
 
--- 创建扩展
-CREATE EXTENSION vastbase_sm4;
-
--- 验证安装
-\dx vastbase_sm4
-
--- 查看扩展信息
-SELECT * FROM sm4_extension_info;
-
--- 测试功能
+-- 测试
 SELECT sm4_generate_key();
+
 ```
 
 ## 验证安装
