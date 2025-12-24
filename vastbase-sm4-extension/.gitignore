@@ -1,0 +1,28 @@
+# 编译输出
+*.o
+*.so
+*.dll
+*.dylib
+*.a
+
+# 目标文件
+src/*.o
+
+# 临时文件
+*~
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PostgreSQL
+regression.diffs
+regression.out
+tmp_check/
