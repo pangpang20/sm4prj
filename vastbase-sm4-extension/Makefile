@@ -24,6 +24,9 @@ endif
 
 JAVA_JAR = ../dis-algorithm/target/dis-algorithm-1.0.0.0.jar
 
+# 强制使用C++11标准（GCC 4.8.5不支持C++14）
+override CXXFLAGS := $(filter-out -std=c++14,$(CXXFLAGS)) -std=c++11
+
 # 根据操作系统配置JNI路径
 ifeq ($(UNAME_S),Linux)
     # Linux系统
@@ -44,6 +47,11 @@ endif
 
 # 包含PostgreSQL扩展构建系统
 include $(PGXS)
+
+# 必须在include $(PGXS)之后再次覆盖C++标准
+# 移除PGXS可能设置的-std=c++14，强制使用-std=c++11
+override CXXFLAGS := $(filter-out -std=c++14,$(CXXFLAGS)) -std=c++11
+override CFLAGS := $(filter-out -std=c++14,$(CFLAGS))
 
 # 必须在include $(PGXS)之后再次覆盖JNI路径
 # 因为VastBase的PGXS会在CPPFLAGS中硬编码huaweijdk路径
@@ -70,4 +78,6 @@ show-config:
 	@echo "JAVA_JAR: $(JAVA_JAR)"
 	@echo "Extension: $(EXTENSION)"
 	@echo "Module: $(MODULE_big)"
+	@echo "CXXFLAGS: $(CXXFLAGS)"
+	@echo "CFLAGS: $(CFLAGS)"
 	@echo "===================================="
