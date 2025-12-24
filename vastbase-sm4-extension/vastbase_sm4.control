@@ -1,0 +1,5 @@
+# VastBase SM4 Extension Control File
+comment = 'SM4 encryption/decryption functions for VastBase using Java implementation via JNI'
+default_version = '1.0'
+module_pathname = '$libdir/vastbase_sm4'
+relocatable = true
