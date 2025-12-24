@@ -1,17 +1,17 @@
 # VastBase SM4 Extension 安装指南
 
-本文档详细说明如何在VastBase或PostgreSQL数据库中安装SM4加密扩展。
+本文档详细说明如何在VastBase数据库中安装SM4加密扩展。
 
 ## 前置条件
 
 ### 1. 系统要求
 
-- **操作系统**: Linux (推荐 CentOS 7+, Ubuntu 18.04+) 或 Windows
-- **数据库**: VastBase 或 PostgreSQL 9.1+
-- **JDK**: Java 8 或更高版本
+- **操作系统**: Linux (推荐 CentOS 7+, Ubuntu 18.04+, UOS 20)
+- **数据库**: VastBase 2.2
+- **JDK**: Java 11 或更高版本
 - **编译工具**: GCC 4.8+ 或 MinGW (Windows)
 
-### 2. 检查PostgreSQL开发环境
+### 2. 检查vastbase开发环境
 
 ```bash
 # 检查pg_config是否可用
@@ -24,20 +24,9 @@ pg_config --version
 pg_config --pgxs
 ```
 
-如果 `pg_config` 不存在，需要安装PostgreSQL开发包：
+如果 `pg_config` 不存在，需要安装vastbase开发包：
+联系vastbase支持
 
-**CentOS/RHEL:**
-```bash
-sudo yum install postgresql-devel
-# 或 VastBase开发包
-sudo yum install vastbase-devel
-```
-
-**Ubuntu/Debian:**
-```bash
-sudo apt-get install postgresql-server-dev-13
-# 替换13为你的PostgreSQL版本
-```
 
 ### 3. 检查JDK环境
 
@@ -71,18 +60,18 @@ ls -lh target/dis-algorithm-1.0.0.0.jar
 ### 步骤2: 配置编译环境
 
 ```bash
+cd /home/vastbase/sm4prj/vastbase-sm4-extension
 
- 设置环境变量
+# 设置环境变量
 export JAVA_HOME=/opt/jdk11 # 根据实际路径调整
 export PG_CONFIG=~/vasthome/bin/pg_config  # 根据实际路径调整
-
-cd /home/vastbase/sm4prj/vastbase-sm4-extension
 
 # 修复配置
 sh fix-compile.sh
 
 # 验证配置
 make show-config
+
 ```
 
 输出示例：
@@ -97,6 +86,8 @@ JAVA_HOME: /opt/jdk11
 JAVA_JAR: ../dis-algorithm/target/dis-algorithm-1.0.0.0.jar
 Extension: vastbase_sm4
 Module: vastbase_sm4
+CXXFLAGS: -std=c++11 -pthread -D_REENTRANT -D_THREAD_SAFE -D_POSIX_PTHREAD_SEMANTICS -fpic -std=c++11
+CFLAGS: -std=c++11 -D_GLIBCXX_USE_CXX11_ABI=0 -fsigned-char -DSTREAMPLAN -DPGXC -mcx16 -msse4.2 -O2 -g3 -D__USE_NUMA -Wall -Wpointer-arith -Wno-write-strings -fnon-call-exceptions -fno-common -freg-struct-return -pipe -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -DENABLE_GSTRACE -fno-aggressive-loop-optimizations -Wno-attributes -fno-omit-frame-pointer -fno-expensive-optimizations -Wno-unused-but-set-variable
 ====================================
 ```
 
@@ -110,21 +101,40 @@ make clean
 make
 
 # 检查生成的文件
-ls -lh vastbase_sm4.so  # Linux
-# 或
-ls -lh vastbase_sm4.dll # Windows
+ls -lh vastbase_sm4.so
+
 ```
 
 ### 步骤4: 安装扩展到数据库
 
 ```bash
 # 需要数据库管理员权限
-sudo make install
+make install
 
-# 或手动安装
-sudo cp vastbase_sm4.so `pg_config --pkglibdir`
-sudo cp vastbase_sm4.control `pg_config --sharedir`/extension/
-sudo cp vastbase_sm4--1.0.sql `pg_config --sharedir`/extension/
+```
+
+安装输出
+```bash
+[vastbase@cyl vastbase-sm4-extension]$ make install
+/usr/bin/mkdir -p '/home/vastbase/vasthome/lib/postgresql'
+/usr/bin/mkdir -p '/home/vastbase/vasthome/share/postgresql/extension'
+/usr/bin/mkdir -p '/home/vastbase/vasthome/share/postgresql/extension'
+/bin/sh /home/vastbase/vasthome/lib/postgresql/pgxs/src/makefiles/../../config/install-sh -c -m 755  vastbase_sm4.so '/home/vastbase/vasthome/lib/postgresql/vastbase_sm4.so'
+/bin/sh /home/vastbase/vasthome/lib/postgresql/pgxs/src/makefiles/../../config/install-sh -c -m 644 ./vastbase_sm4.control '/home/vastbase/vasthome/share/postgresql/extension/'
+/bin/sh /home/vastbase/vasthome/lib/postgresql/pgxs/src/makefiles/../../config/install-sh -c -m 644 ./vastbase_sm4--1.0.sql  '/home/vastbase/vasthome/share/postgresql/extension/'
+```
+
+检查
+
+```bash
+[vastbase@cyl postgresql]$ ls -ltr /home/vastbase/vasthome/lib/postgresql | grep vastbase_sm4
+-rwxr-xr-x 1 vastbase vastbase   29736 Dec 24 15:52 vastbase_sm4.so
+
+[vastbase@cyl postgresql]$ ls -ltr /home/vastbase/vasthome/share/postgresql/extension | grep vastbase_sm4
+-rw-r--r-- 1 vastbase vastbase    217 Dec 24 15:52 vastbase_sm4.control
+-rw-r--r-- 1 vastbase vastbase   3087 Dec 24 15:52 vastbase_sm4--1.0.sql
+
+
 ```
 
 ### 步骤5: 配置数据库环境
@@ -151,21 +161,22 @@ sudo ldconfig
 ### 步骤6: 重启数据库
 
 ```bash
-# PostgreSQL
-sudo systemctl restart postgresql-13
+vb_ctl restart
 
-# VastBase
-sudo systemctl restart vastbase
+```
 
-# 或使用pg_ctl
-pg_ctl restart -D /var/lib/pgsql/13/data
+等待重启完成
+```bash
+[2025-12-24 16:04:37.914][16717][][vb_ctl]:  done
+[2025-12-24 16:04:37.914][16717][][vb_ctl]: server started (/opt/vastdata)
+
 ```
 
 ### 步骤7: 创建扩展
 
 ```sql
 -- 连接到数据库
-psql -U postgres -d your_database
+vsql -r
 
 -- 创建扩展
 CREATE EXTENSION vastbase_sm4;
