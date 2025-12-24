@@ -38,6 +38,9 @@ static void ensure_jvm_initialized(void) {
  */
 PG_FUNCTION_INFO_V1(sm4_generate_key_pg);
 
+/* 使用asm强制C符号名，避免C++名称修饰 */
+Datum sm4_generate_key_pg(PG_FUNCTION_ARGS) asm("sm4_generate_key_pg");
+
 Datum
 sm4_generate_key_pg(PG_FUNCTION_ARGS)
 {
@@ -64,6 +67,8 @@ sm4_generate_key_pg(PG_FUNCTION_ARGS)
  * SM4加密函数（16进制）
  */
 PG_FUNCTION_INFO_V1(sm4_encrypt_pg);
+
+Datum sm4_encrypt_pg(PG_FUNCTION_ARGS) asm("sm4_encrypt_pg");
 
 Datum
 sm4_encrypt_pg(PG_FUNCTION_ARGS)
@@ -110,6 +115,8 @@ sm4_encrypt_pg(PG_FUNCTION_ARGS)
  */
 PG_FUNCTION_INFO_V1(sm4_decrypt_pg);
 
+Datum sm4_decrypt_pg(PG_FUNCTION_ARGS) asm("sm4_decrypt_pg");
+
 Datum
 sm4_decrypt_pg(PG_FUNCTION_ARGS)
 {
@@ -155,6 +162,8 @@ sm4_decrypt_pg(PG_FUNCTION_ARGS)
  */
 PG_FUNCTION_INFO_V1(sm4_encrypt_base64_pg);
 
+Datum sm4_encrypt_base64_pg(PG_FUNCTION_ARGS) asm("sm4_encrypt_base64_pg");
+
 Datum
 sm4_encrypt_base64_pg(PG_FUNCTION_ARGS)
 {
@@ -199,6 +208,8 @@ sm4_encrypt_base64_pg(PG_FUNCTION_ARGS)
  * SM4解密函数（Base64）
  */
 PG_FUNCTION_INFO_V1(sm4_decrypt_base64_pg);
+
+Datum sm4_decrypt_base64_pg(PG_FUNCTION_ARGS) asm("sm4_decrypt_base64_pg");
 
 Datum
 sm4_decrypt_base64_pg(PG_FUNCTION_ARGS)

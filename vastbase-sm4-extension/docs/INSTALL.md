@@ -101,7 +101,10 @@ make clean
 make
 
 # 检查生成的文件
-ls -lh vastbase_sm4.so
+ls -ltr vastbase_sm4.so
+
+# 用 nm 命令检查 .so 文件中的符号
+nm -C vastbase_sm4.so | grep sm4_generate_key_pg
 
 ```
 
@@ -158,8 +161,10 @@ vb_ctl restart
 -- 连接到数据库
 vsql -r
 
-psql -d vastbase -c "DROP EXTENSION IF EXISTS vastbase_sm4;"
-psql -d vastbase -c "CREATE EXTENSION vastbase_sm4;"
+
+-- 删除扩展
+DROP EXTENSION IF EXISTS vastbase_sm4;
+
 -- 创建扩展
 CREATE EXTENSION vastbase_sm4;
 
