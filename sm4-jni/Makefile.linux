@@ -1,0 +1,64 @@
+# SM4 JNI Makefile for Linux/macOS
+
+CC = gcc
+JAVA_HOME ?= /usr/lib/jvm/java-11-openjdk-amd64
+TARGET = libsm4_jni.so
+JAVA_JAR = ../dis-algorithm/target/dis-algorithm-1.0.0.0.jar
+
+# 源文件
+SOURCES = src/sm4_jni.c src/sm4_wrapper.c
+OBJECTS = $(SOURCES:.c=.o)
+
+# 检测操作系统
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+    INCLUDES = -I"$(JAVA_HOME)/include" -I"$(JAVA_HOME)/include/linux" -Iinclude
+    LIBS = -L"$(JAVA_HOME)/lib/server" -ljvm
+    LDFLAGS = -shared -fPIC $(LIBS)
+endif
+ifeq ($(UNAME_S),Darwin)
+    INCLUDES = -I"$(JAVA_HOME)/include" -I"$(JAVA_HOME)/include/darwin" -Iinclude
+    LIBS = -L"$(JAVA_HOME)/lib/server" -ljvm
+    LDFLAGS = -dynamiclib -fPIC $(LIBS)
+    TARGET = libsm4_jni.dylib
+endif
+
+# 编译选项
+CFLAGS = -Wall -O2 -fPIC $(INCLUDES)
+
+# 默认目标
+all: $(TARGET) test_sm4 simple_example
+
+# 生成动态库
+$(TARGET): $(OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $^
+
+# 编译目标文件
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# 编译测试程序
+test_sm4: test/test_sm4.c $(OBJECTS)
+	$(CC) $(CFLAGS) -o test_sm4 test/test_sm4.c src/sm4_wrapper.c src/sm4_jni.c $(LIBS)
+
+# 编译示例程序
+simple_example: examples/simple_example.c $(OBJECTS)
+	$(CC) $(CFLAGS) -o simple_example examples/simple_example.c src/sm4_wrapper.c src/sm4_jni.c $(LIBS)
+
+# 清理
+clean:
+	rm -f src/*.o $(TARGET) test_sm4 simple_example
+
+# 运行测试
+test: test_sm4
+	export LD_LIBRARY_PATH=$(JAVA_HOME)/lib/server:$$LD_LIBRARY_PATH && \
+	export CLASSPATH=$(JAVA_JAR):$$CLASSPATH && \
+	./test_sm4
+
+# 运行示例
+run-example: simple_example
+	export LD_LIBRARY_PATH=$(JAVA_HOME)/lib/server:$$LD_LIBRARY_PATH && \
+	export CLASSPATH=$(JAVA_JAR):$$CLASSPATH && \
+	./simple_example
+
+.PHONY: all clean test run-example
