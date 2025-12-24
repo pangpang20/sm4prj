@@ -137,26 +137,6 @@ make install
 
 ```
 
-### 步骤5: 配置数据库环境
-
-编辑 `postgresql.conf` 或 `vastbase.conf`：
-
-```ini
-# 添加JVM库路径
-# Linux
-env = 'LD_LIBRARY_PATH=/usr/lib/jvm/java-11-openjdk-amd64/lib/server'
-
-# 或使用 environment_variables (PostgreSQL 14+)
-environment_variables = 'LD_LIBRARY_PATH=/usr/lib/jvm/java-11-openjdk-amd64/lib/server'
-```
-
-或者在系统级别配置：
-
-```bash
-# 编辑 /etc/ld.so.conf.d/jvm.conf
-sudo echo "/usr/lib/jvm/java-11-openjdk-amd64/lib/server" > /etc/ld.so.conf.d/jvm.conf
-sudo ldconfig
-```
 
 ### 步骤6: 重启数据库
 

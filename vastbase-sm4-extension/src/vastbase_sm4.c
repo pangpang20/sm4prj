@@ -14,6 +14,11 @@
 PG_MODULE_MAGIC;
 #endif
 
+/* 防止C++名称修饰，确保PostgreSQL能找到函数符号 */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* jar包路径配置 - 可以通过GUC参数配置，这里使用默认值 */
 static char *jar_path = "../dis-algorithm/target/dis-algorithm-1.0.0.0.jar";
 static bool jvm_initialized = false;
@@ -239,3 +244,8 @@ sm4_decrypt_base64_pg(PG_FUNCTION_ARGS)
     
     PG_RETURN_TEXT_P(result);
 }
+
+/* 关闭extern "C"块 */
+#ifdef __cplusplus
+}
+#endif
