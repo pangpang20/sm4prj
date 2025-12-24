@@ -74,21 +74,23 @@ ls -lh target/dis-algorithm-1.0.0.0.jar
 cd /path/to/putuo/vastbase-sm4-extension
 
 # 设置环境变量
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-export PG_CONFIG=/usr/pgsql-13/bin/pg_config  # 根据实际路径调整
+#export JAVA_HOME="/opt/jdk11" # 根据实际路径调整
+export PG_CONFIG="~/vasthome/bin/pg_config"  # 根据实际路径调整
 
+cd /home/vastbase/sm4prj/vastbase-sm4-extension
 # 验证配置
 make show-config
 ```
 
 输出示例：
 ```
+[vastbase@cyl vastbase-sm4-extension]$ make show-config
 ====================================
 VastBase SM4 Extension Build Config
 ====================================
-PG_CONFIG: /usr/pgsql-13/bin/pg_config
-PGXS: /usr/pgsql-13/lib/pgxs/src/makefiles/pgxs.mk
-JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+PG_CONFIG: ~/vasthome/bin/pg_config
+PGXS: /home/vastbase/vasthome/lib/postgresql/pgxs/src/makefiles/pgxs.mk
+JAVA_HOME: /home/vastbase/binarylibs/platform/huaweijdk8/x86_64/jdk
 JAVA_JAR: ../dis-algorithm/target/dis-algorithm-1.0.0.0.jar
 Extension: vastbase_sm4
 Module: vastbase_sm4

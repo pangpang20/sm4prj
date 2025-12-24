@@ -14,18 +14,45 @@ PG_CONFIG ?= pg_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 
 # JDK配置
-JAVA_HOME ?= C:/Program Files/Java/jdk-11
+# 自动检测操作系统和JDK路径
+UNAME_S := $(shell uname -s)
+
+# 默认JAVA_HOME（如果环境变量未设置）
+ifeq ($(JAVA_HOME),)
+    # 尝试从pg_config获取的编译标志中提取JAVA_HOME
+    DETECTED_JDK := $(shell echo '$(PG_CPPFLAGS)' | grep -o '/[^[:space:]]*/jdk[^[:space:]]*' | head -1)
+    ifneq ($(DETECTED_JDK),)
+        JAVA_HOME := $(DETECTED_JDK)
+    else
+        # 如果还是找不到，使用常见路径
+        ifeq ($(UNAME_S),Linux)
+            JAVA_HOME ?= /usr/lib/jvm/java-11-openjdk-amd64
+        else ifeq ($(UNAME_S),Darwin)
+            JAVA_HOME ?= /Library/Java/JavaVirtualMachines/jdk-11.jdk/Contents/Home
+        else
+            JAVA_HOME ?= C:/Program Files/Java/jdk-11
+        endif
+    endif
+endif
+
 JAVA_JAR = ../dis-algorithm/target/dis-algorithm-1.0.0.0.jar
 
-# 包含JNI头文件
-PG_CPPFLAGS = -I"$(JAVA_HOME)/include" -I"$(JAVA_HOME)/include/win32"
-# 链接JVM库
-SHLIB_LINK = -L"$(JAVA_HOME)/lib" -ljvm
-
-# Windows特殊处理
-ifeq ($(OS),Windows_NT)
-    # Windows下需要添加jvm.dll的路径到运行时搜索路径
-    PG_CPPFLAGS += -DWIN32
+# 根据操作系统配置JNI路径
+ifeq ($(UNAME_S),Linux)
+    # Linux系统
+    PG_CPPFLAGS += -I"$(JAVA_HOME)/include" -I"$(JAVA_HOME)/include/linux"
+    SHLIB_LINK += -L"$(JAVA_HOME)/lib/server" -L"$(JAVA_HOME)/jre/lib/amd64/server" -ljvm
+    # 添加rpath，运行时能找到libjvm.so
+    SHLIB_LINK += -Wl,-rpath,"$(JAVA_HOME)/lib/server" -Wl,-rpath,"$(JAVA_HOME)/jre/lib/amd64/server"
+else ifeq ($(UNAME_S),Darwin)
+    # macOS系统
+    PG_CPPFLAGS += -I"$(JAVA_HOME)/include" -I"$(JAVA_HOME)/include/darwin"
+    SHLIB_LINK += -L"$(JAVA_HOME)/lib/server" -ljvm
+    SHLIB_LINK += -Wl,-rpath,"$(JAVA_HOME)/lib/server"
+else
+    # Windows系统
+    PG_CPPFLAGS += -I"$(JAVA_HOME)/include" -I"$(JAVA_HOME)/include/win32" -DWIN32
+    SHLIB_LINK += -L"$(JAVA_HOME)/lib" -ljvm
 endif
 
 # 包含PostgreSQL扩展构建系统
