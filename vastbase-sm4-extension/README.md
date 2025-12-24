@@ -50,11 +50,12 @@ mvn clean package
 ### 2. 配置环境变量
 
 ```bash
+# 根据实际调整
 # 设置JAVA_HOME
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export JAVA_HOME=/home/vastbase/binarylibs/platform/huaweijdk8/x86_64/jdk
 
 # 设置pg_config路径（如果不在PATH中）
-export PG_CONFIG=/usr/pgsql-13/bin/pg_config
+export PG_CONFIG=/home/vasthome/bin/pg_config
 ```
 
 ### 3. 编译扩展

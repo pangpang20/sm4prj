@@ -8,25 +8,47 @@ echo "VastBase SM4 扩展编译问题诊断"
 echo "========================================"
 echo ""
 
-# 1. 从VastBase的pg_config中提取JAVA_HOME
+# 1. 检测JDK路径
 echo "步骤1: 检测JDK路径..."
 echo "-----------------------------"
 
-# 尝试从编译参数中提取JDK路径
-DETECTED_JDK=$(pg_config --cppflags | grep -oP '/[^[:space:]]*/jdk[^[:space:]]*' | head -1)
+# VastBase常见的JDK路径
+POSSIBLE_JDK_PATHS=(
+    "/opt/jdk11"
+    "/opt/jdk"
+    "/home/vastbase/binarylibs/platform/huaweijdk8/x86_64/jdk"
+    "/home/vastbase/binarylibs/platform/huaweijdk/x86_64/jdk"
+    "/usr/lib/jvm/java-11-openjdk-amd64"
+    "/usr/lib/jvm/java-11-openjdk"
+    "/usr/lib/jvm/java-1.8.0-openjdk"
+    "$JAVA_HOME"
+)
 
-if [ -n "$DETECTED_JDK" ]; then
-    echo "✓ 从VastBase配置中检测到JDK: $DETECTED_JDK"
-    export JAVA_HOME="$DETECTED_JDK"
-elif [ -d "/home/vastbase/binarylibs/platform/huaweijdk8/x86_64/jdk" ]; then
-    echo "✓ 使用HuaweiJDK: /home/vastbase/binarylibs/platform/huaweijdk8/x86_64/jdk"
-    export JAVA_HOME="/home/vastbase/binarylibs/platform/huaweijdk8/x86_64/jdk"
+# 如果环境变量已设置，优先使用
+if [ -n "$JAVA_HOME" ] && [ -d "$JAVA_HOME" ]; then
+    echo "✓ 使用环境变量中的JAVA_HOME: $JAVA_HOME"
 else
-    echo "✗ 无法自动检测JDK路径"
-    echo ""
-    echo "请手动设置JAVA_HOME，例如:"
-    echo "  export JAVA_HOME=/path/to/your/jdk"
-    exit 1
+    # 尝试在常见路径中查找
+    FOUND=false
+    for path in "${POSSIBLE_JDK_PATHS[@]}"; do
+        if [ -d "$path" ] && [ -f "$path/include/jni.h" ]; then
+            export JAVA_HOME="$path"
+            echo "✓ 检测到JDK: $JAVA_HOME"
+            FOUND=true
+            break
+        fi
+    done
+    
+    if [ "$FOUND" = false ]; then
+        echo "✗ 无法自动检测JDK路径"
+        echo ""
+        echo "请手动设置JAVA_HOME，例如:"
+        echo "  export JAVA_HOME=/home/vastbase/binarylibs/platform/huaweijdk8/x86_64/jdk"
+        echo ""
+        echo "或者查找JDK位置:"
+        echo "  find /home/vastbase -name 'jni.h' 2>/dev/null | head -5"
+        exit 1
+    fi
 fi
 
 echo ""
