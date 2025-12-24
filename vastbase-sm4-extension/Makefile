@@ -50,10 +50,10 @@ include $(PGXS)
 # 我们需要强制覆盖编译规则
 
 # 自定义编译规则，强制使用我们的JAVA_HOME
-# VastBase使用g++编译C文件
+# 使用gcc编译C文件（C风格的JNI API）
 src/%.o: src/%.c
 	@echo "Compiling $< with JAVA_HOME=$(JAVA_HOME)"
-	g++ -std=c++11 -D_GLIBCXX_USE_CXX11_ABI=0 -I"$(JAVA_HOME)/include" -I"$(JAVA_HOME)/include/linux" \
+	gcc -std=gnu99 -I"$(JAVA_HOME)/include" -I"$(JAVA_HOME)/include/linux" \
 		-I/home/vastbase/vasthome/include/postgresql/server \
 		-I/home/vastbase/vasthome/include/postgresql/internal \
 		-D_GNU_SOURCE -Wall -fPIC -c -o $@ $<
