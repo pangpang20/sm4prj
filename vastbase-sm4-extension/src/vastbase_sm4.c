@@ -34,13 +34,19 @@ static const char* get_jar_path(void) {
 static void ensure_jvm_initialized(void) {
     if (!jvm_initialized) {
         const char *jar_path = get_jar_path();
+        int init_result;
+        
         elog(NOTICE, "SM4 JVM initializing with JAR: %s", jar_path);
         
-        if (sm4_jni_init_if_needed(jar_path) != 0) {
+        /* 调用JNI初始化 */
+        init_result = sm4_jni_init_if_needed(jar_path);
+        
+        if (init_result != 0) {
             ereport(ERROR,
                     (errcode(ERRCODE_INTERNAL_ERROR),
                      errmsg("Failed to initialize SM4 JNI: %s", sm4_jni_get_error())));
         }
+        
         jvm_initialized = true;
         elog(NOTICE, "SM4 JVM initialized successfully");
     }
@@ -59,12 +65,21 @@ sm4_generate_key_pg(PG_FUNCTION_ARGS)
 {
     char key_buffer[64];
     text *result;
+    int gen_result;
+    
+    elog(NOTICE, "SM4 generate_key: starting");
     
     /* 确保JVM已初始化 */
     ensure_jvm_initialized();
     
+    elog(NOTICE, "SM4 generate_key: JVM ready, calling JNI");
+    
     /* 调用JNI生成密钥 */
-    if (sm4_jni_generate_key(key_buffer, sizeof(key_buffer)) != 0) {
+    gen_result = sm4_jni_generate_key(key_buffer, sizeof(key_buffer));
+    
+    elog(NOTICE, "SM4 generate_key: JNI returned %d", gen_result);
+    
+    if (gen_result != 0) {
         ereport(ERROR,
                 (errcode(ERRCODE_INTERNAL_ERROR),
                  errmsg("SM4 key generation failed: %s", sm4_jni_get_error())));
@@ -72,6 +87,8 @@ sm4_generate_key_pg(PG_FUNCTION_ARGS)
     
     /* 转换为PostgreSQL text类型 */
     result = cstring_to_text(key_buffer);
+    
+    elog(NOTICE, "SM4 generate_key: success");
     
     PG_RETURN_TEXT_P(result);
 }
