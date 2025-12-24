@@ -5,20 +5,9 @@
  * 提供数据库级别的加密/解密函数
  */
 
-/* 在包含PostgreSQL头文件之前，在C++环境下强制使用C链接 */
-#ifdef __cplusplus
-#define PG_USE_INLINE
-extern "C" {
-#endif
-
 #include "postgres.h"
 #include "fmgr.h"
 #include "utils/builtins.h"
-
-#ifdef __cplusplus
-}
-#endif
-
 #include "sm4_jni_wrapper.h"
 
 #ifdef PG_MODULE_MAGIC
