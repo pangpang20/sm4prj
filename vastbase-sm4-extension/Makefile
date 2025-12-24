@@ -59,9 +59,11 @@ override CFLAGS := $(filter-out -std=c++14,$(CFLAGS))
 
 # 自定义编译规则，强制使用我们的JAVA_HOME
 # VastBase需要用g++编译（支持C++特性），JNI代码使用C++风格API
+# 添加 -fvisibility=default 确保函数符号可见
 src/%.o: src/%.c
 	@echo "Compiling $< with JAVA_HOME=$(JAVA_HOME)"
-	g++ -std=c++11 -D_GLIBCXX_USE_CXX11_ABI=0 -I"$(JAVA_HOME)/include" -I"$(JAVA_HOME)/include/linux" \
+	g++ -std=c++11 -D_GLIBCXX_USE_CXX11_ABI=0 -fvisibility=default \
+		-I"$(JAVA_HOME)/include" -I"$(JAVA_HOME)/include/linux" \
 		-I/home/vastbase/vasthome/include/postgresql/server \
 		-I/home/vastbase/vasthome/include/postgresql/internal \
 		-D_GNU_SOURCE -Wall -fPIC -c -o $@ $<
