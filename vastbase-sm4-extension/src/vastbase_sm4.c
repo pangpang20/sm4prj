@@ -9,20 +9,33 @@
 #include "fmgr.h"
 #include "utils/builtins.h"
 #include "sm4_jni_wrapper.h"
+#include <stdlib.h>  /* for getenv */
 
 #ifdef PG_MODULE_MAGIC
 PG_MODULE_MAGIC;
 #endif
 
-/* jar包路径配置 - 可以通过GUC参数配置，这里使用默认值 */
-static const char *jar_path = "../dis-algorithm/target/dis-algorithm-1.0.0.0.jar";
+/* jar包路径配置 - 优先从环境变量UDF_JAR读取，否则使用默认值 */
+static const char *default_jar_path = "/home/vastbase/dis-algorithm-1.0.0.0.jar";
 static bool jvm_initialized = false;
+
+/* 获取JAR路径 */
+static const char* get_jar_path(void) {
+    const char *env_path = getenv("UDF_JAR");
+    if (env_path != NULL && env_path[0] != '\0') {
+        return env_path;
+    }
+    return default_jar_path;
+}
 
 /*
  * 初始化JVM（延迟初始化）
  */
 static void ensure_jvm_initialized(void) {
     if (!jvm_initialized) {
+        const char *jar_path = get_jar_path();
+        elog(NOTICE, "SM4 JVM initializing with JAR: %s", jar_path);
+        
         if (sm4_jni_init_if_needed(jar_path) != 0) {
             ereport(ERROR,
                     (errcode(ERRCODE_INTERNAL_ERROR),

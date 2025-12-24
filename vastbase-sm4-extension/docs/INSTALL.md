@@ -55,6 +55,12 @@ mvn clean package
 
 # 验证jar包生成
 ls -lh target/dis-algorithm-1.0.0.0.jar
+
+chmod u+x dis-algorithm-1.0.0.0.jar
+
+# 复制到这个目录，不能改
+cp target/dis-algorithm-1.0.0.0.jar /home/vastbase/dis-algorithm-1.0.0.0.jar
+
 ```
 
 ### 步骤2: 配置编译环境
@@ -65,7 +71,7 @@ cd /home/vastbase/sm4prj/vastbase-sm4-extension
 # 设置环境变量
 export JAVA_HOME=/opt/jdk11 # 根据实际路径调整
 export PG_CONFIG=~/vasthome/bin/pg_config  # 根据实际路径调整
-
+export UDF_JAR=/home/vastbase/dis-algorithm-1.0.0.0.jar
 # 修复配置
 sh fix-compile.sh
 
