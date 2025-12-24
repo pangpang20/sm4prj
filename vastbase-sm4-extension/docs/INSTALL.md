@@ -77,6 +77,10 @@ export JAVA_HOME=/opt/jdk11 # 根据实际路径调整
 export PG_CONFIG=~/vasthome/bin/pg_config  # 根据实际路径调整
 
 cd /home/vastbase/sm4prj/vastbase-sm4-extension
+
+# 修复配置
+sh fix-compile.sh
+
 # 验证配置
 make show-config
 ```
@@ -87,16 +91,16 @@ make show-config
 ====================================
 VastBase SM4 Extension Build Config
 ====================================
-PG_CONFIG: ~/vasthome/bin/pg_config
+PG_CONFIG: /home/vastbase/vasthome/bin/pg_config
 PGXS: /home/vastbase/vasthome/lib/postgresql/pgxs/src/makefiles/pgxs.mk
-JAVA_HOME: /home/vastbase/binarylibs/platform/huaweijdk8/x86_64/jdk
+JAVA_HOME: /opt/jdk11
 JAVA_JAR: ../dis-algorithm/target/dis-algorithm-1.0.0.0.jar
 Extension: vastbase_sm4
 Module: vastbase_sm4
 ====================================
 ```
 
-### 步骤3: 编译扩展
+### 步骤3: 编译扩展echo
 
 ```bash
 # 清理之前的编译

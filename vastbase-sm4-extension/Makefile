@@ -45,6 +45,19 @@ endif
 # 包含PostgreSQL扩展构建系统
 include $(PGXS)
 
+# 必须在include $(PGXS)之后再次覆盖JNI路径
+# 因为VastBase的PGXS会在CPPFLAGS中硬编码huaweijdk路径
+# 我们需要强制覆盖编译规则
+
+# 自定义编译规则，强制使用我们的JAVA_HOME
+# VastBase使用g++编译C文件
+src/%.o: src/%.c
+	@echo "Compiling $< with JAVA_HOME=$(JAVA_HOME)"
+	g++ -std=c++11 -D_GLIBCXX_USE_CXX11_ABI=0 -I"$(JAVA_HOME)/include" -I"$(JAVA_HOME)/include/linux" \
+		-I/home/vastbase/vasthome/include/postgresql/server \
+		-I/home/vastbase/vasthome/include/postgresql/internal \
+		-D_GNU_SOURCE -Wall -fPIC -c -o $@ $<
+
 # 自定义目标：在安装前显示配置信息
 .PHONY: show-config
 show-config:
