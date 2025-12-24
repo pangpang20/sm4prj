@@ -158,6 +158,8 @@ vb_ctl restart
 -- 连接到数据库
 vsql -r
 
+psql -d vastbase -c "DROP EXTENSION IF EXISTS vastbase_sm4;"
+psql -d vastbase -c "CREATE EXTENSION vastbase_sm4;"
 -- 创建扩展
 CREATE EXTENSION vastbase_sm4;
 

@@ -2,7 +2,7 @@
  * VastBase SM4 Extension - PostgreSQL C Extension
  * 
  * 这个扩展通过JNI调用Java实现的SM4国密加密算法
- * 提供数据库级别的加密/解密函数
+ * 提供数据库层级别的加密/解密函数
  */
 
 #include "postgres.h"
@@ -14,13 +14,8 @@
 PG_MODULE_MAGIC;
 #endif
 
-/* 防止C++名称修饰，确保PostgreSQL能找到函数符号 */
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* jar包路径配置 - 可以通过GUC参数配置，这里使用默认值 */
-static char *jar_path = "../dis-algorithm/target/dis-algorithm-1.0.0.0.jar";
+static const char *jar_path = "../dis-algorithm/target/dis-algorithm-1.0.0.0.jar";
 static bool jvm_initialized = false;
 
 /*
@@ -37,6 +32,11 @@ static void ensure_jvm_initialized(void) {
         elog(NOTICE, "SM4 JVM initialized successfully");
     }
 }
+
+/* 防止C++名称修饰 - 必须在PG_FUNCTION_INFO_V1之前 */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*
  * SM4密钥生成函数
