@@ -73,8 +73,8 @@ ls -lh target/dis-algorithm-1.0.0.0.jar
 ```bash
 
  设置环境变量
-#export JAVA_HOME="/opt/jdk11" # 根据实际路径调整
-export PG_CONFIG="~/vasthome/bin/pg_config"  # 根据实际路径调整
+export JAVA_HOME=/opt/jdk11 # 根据实际路径调整
+export PG_CONFIG=~/vasthome/bin/pg_config  # 根据实际路径调整
 
 cd /home/vastbase/sm4prj/vastbase-sm4-extension
 # 验证配置
